@@ -57,6 +57,8 @@ The main test I ran was `pytest` against `tests/test_game_logic.py`. It showed t
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
 
+I'd say Streamlit re-runs your entire script from top to bottom every single time the user interacts with the app — clicking a button, typing in a box, anything. So any normal Python variable gets recreated from scratch on every interaction, which means it can't "remember" anything between clicks. `st.session_state` is the fix: it's a dictionary that survives those reruns, so it's where you store things you want to persist, like the secret number, the score, and whether the game is won or lost. This project drove that home through Bug #3: clicking "New Game" reset some session state keys but forgot `status`, so even though the script re-ran, the leftover "won"/"lost" value kept blocking play. The lesson is that with reruns, *what you choose to put in (and reset in) session state* is the actual game state.
+
 ---
 
 ## 5. Looking ahead: your developer habits
@@ -65,3 +67,9 @@ The main test I ran was `pytest` against `tests/test_game_logic.py`. It showed t
   - This could be a testing habit, a prompting strategy, or a way you used Git.
 - What is one thing you would do differently next time you work with AI on a coding task?
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+
+**A habit I want to reuse:** separating pure logic from the UI and writing small pytest tests against it. Once I moved `check_guess` into `logic_utils.py`, I could test the exact behavior (`check_guess(42, 42)` must win) without launching Streamlit, and those tests gave me confidence the bug was actually gone and would stay gone. I want to write a quick test the moment I fix a bug from now on.
+
+**What I'd do differently:** I'd verify the AI's environment advice before acting on it. When I hit "No module named streamlit," I almost blindly re-ran `pip install`, but the real problem was my virtual environment being built on the wrong Python interpreter. Next time I'll check *which* Python and which environment is active first, instead of assuming the AI's first suggestion is the root cause.
+
+**How this changed my thinking:** I now treat AI-generated code as a confident first draft, not a finished product — it produced code that looked clean and "production-ready" but was full of subtle logic bugs, so it needs the same reading, testing, and skepticism I'd apply to any human-written code. Being willing to reject a suggestion (like the quick pip-install fix, or the broken starter tests that compared a tuple to a string) is part of staying in control of the process.
